@@ -9,7 +9,6 @@ int main() {
 	hashTable.insert(2, 8);
 	hashTable.insert(3, 9);
 
-	// Печатаем содержимое
 	hashTable.print();
 
 	return 0;
