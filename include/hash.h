@@ -10,6 +10,10 @@ class HashTable {
 	struct Pair {
 		K key;
 		V value;
+		bool not_empty;
+
+		Pair(): key(0), value(0), not_empty(false){}
+		Pair(const K& key, const V& value) : key(key), value(value), not_empty(true) {}
 	};
 	std::vector<Pair> _data;
 	size_t _size;
@@ -21,12 +25,12 @@ class HashTable {
 
 	size_t hashFunction(const K& key) {
 		double A = 0.6180339887;  //  онстанта A, котора€ €вл€етс€ приближенным значением ((sqrt(5) - 1) / 2)
-		double fractionalPart = key * A - int(key * A);  // ¬ычисл€ем дробную часть от умножени€ ключа на константу A
-		return size_t(_data.size() * fractionalPart);  // ”множаем дробную часть на размер таблицы и возвращаем целую часть результата
+		double fractional_part = key * A - int(key * A);  // ¬ычисл€ем дробную часть от умножени€ ключа на константу A
+		return size_t(_data.size() * fractional_part);  // ”множаем дробную часть на размер таблицы и возвращаем целую часть результата
 	}
 
 public:
-	HashTable() : _data(10), _size(0) {}
+	HashTable() : _data(0), _size(0) {}
 
 	HashTable(size_t capacity) {
 		_data.resize(capacity);
@@ -71,12 +75,58 @@ public:
 		_size++;
 	}
 
-	void insert_or_assign(K key, V value);
-	bool contains(V value) const;
-	bool erase(K key);
-	size_t count(K key) const;
-	V* search(K key);
-	void rehash();
+	void insert_or_assign(K key, V value) {
+		size_t index = hashFunction(key);
+		for (auto& pair : _data) {
+			if (pair.key == key) {
+				pair.value = value;
+				return;
+			}
+		}
+		_data[index]= Pair(key, value);
+	}
+
+	bool contains(V value) const {
+		for (const auto& pair : _data) {
+			if (pair.value == value) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool erase(K key) {
+		size_t index = hashFunction(key);
+		for (auto& pair : _data) {
+			if (pair.key == key) {
+				pair.not_empty = false;
+				_size--;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	size_t count(K key) const {
+		size_t index = hashFunction(key);
+		size_t cnt = 0;
+		for (const auto& pair : _data) {
+			if (pair.key == key) {
+				cnt++;
+			}
+		}
+		return cnt;
+	}
+
+	V* search(K key) {
+		size_t index = hashFunction(key);
+		for (auto& pair : _data) {
+			if (pair.key == key) {
+				return &pair.value;
+			}
+		}
+		return nullptr;
+	}
 
 };
 #endif
