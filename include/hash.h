@@ -18,15 +18,11 @@ class HashTable {
 	std::vector<Pair> _data;
 	size_t _size;
 
-	/*size_t hashFunction(const K& key) {
-		size_t h = std::hash<K>{}(key);
-		return (h * 2654435761u) % _data.size();
-	}*/
-
 	size_t hashFunction(const K& key) {
-		double A = 0.6180339887;  //  онстанта A, котора€ €вл€етс€ приближенным значением ((sqrt(5) - 1) / 2)
-		double fractional_part = key * A - int(key * A);  // ¬ычисл€ем дробную часть от умножени€ ключа на константу A
-		return size_t(_data.size() * fractional_part);  // ”множаем дробную часть на размер таблицы и возвращаем целую часть результата
+		double w = 64;
+		double a = 8589934583; //взаимно простое число к 64 (2^33-1)
+		double result = _data.size()*std::fmod(((a/w) * key), 1); // ¬ычисл€ем ((a / w) * k) mod 1
+		return result;
 	}
 
 public:
@@ -83,7 +79,8 @@ public:
 				return;
 			}
 		}
-		_data[index]= Pair(key, value);
+		//_data[index]= Pair(key, value);
+		insert(key, value);
 	}
 
 	bool contains(V value) const {
@@ -107,7 +104,7 @@ public:
 		return false;
 	}
 
-	size_t count(K key) const {
+	size_t count(K key) {
 		size_t index = hashFunction(key);
 		size_t cnt = 0;
 		for (const auto& pair : _data) {
