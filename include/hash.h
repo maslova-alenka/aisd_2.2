@@ -17,18 +17,17 @@ class HashTable {
 		Pair(const K& key, const V& value) : key(key), value(value), not_empty(true) {}
 	};
 	std::vector<std::list<Pair>> _data;
-	//std::vector<Pair> _data;
 	size_t _size;
 
-	size_t hashFunction(const K& key) {
+	size_t hash_function(const K& key) {
 		double w = 64;
 		double a = 8589934583; //взаимно простое число к 64 (2^33-1)
-		double result = _data.size()*std::fmod(((a/w) * key), 1); // Вычисляем ((a / w) * k) mod 1
+		double result = _data.size()*std::fmod(((a/w) * key), 1); // Вычисляем K((a / w) * k) mod 1
 		return result;
 	}
 
 	Pair* find(const K& key) {
-		size_t index = hashFunction(key);
+		size_t index = hash_function(key);
 		for (const auto& pair : _data[index]) {
 			if (pair.key == key && pair.not_empty) {
 				return &pair;
@@ -71,16 +70,9 @@ public:
 		return _data.size();
 	}
 
-	/*void print() const {
-		for (const Pair& pair : _data) {
-			std::cout << "{" << pair.key << " : " << pair.value << "} ";
-		}
-		std::cout << std::endl;
-	}*/
-
 	void print() const {
 		for (size_t i = 0; i < _data.size(); ++i) {
-			std::cout << "Level " << i << ": ";
+			std::cout << i << ": ";
 			for (const auto& pair : _data[i]) {
 				std::cout << "{" << pair.key << " : " << pair.value << "} ";
 			}
@@ -102,40 +94,16 @@ public:
 		throw std::out_of_range("Key not found");
 	}
 
-	//void insert(const K& key, const V& value) {
-	//	size_t index = hashFunction(key);
-	//	for (auto& pair : _data[index]) {
-	//		if (comparator_key(pair.key, key)) {
-	//			_data[index].push_back({ key, value });
-	//			_size++;
-	//			return;
-	//		}
-	//	}
-	//	_data[index].push_back({ key, value });  
-	//	_size++;
-	//}
-
-	//void insert_or_assign(const K& key, const V& value) {
-	//	size_t index = hashFunction(key);
-	//	for (auto& pair : _data[index]) {
-	//		if (comparator_key(pair.key, key)) {
-	//			pair.value = value;
-	//			return;
-	//		}
-	//	}
-	//	_data[index].push_back({ key, value });
-	//	_size++;
-	//}
 
 	void insert(K key, V value){
-		size_t index = hashFunction(key);
+		size_t index = hash_function(key);
 		_data[index].push_back({ key, value });
 		_size++;
 	}
 
 
-	void insert_or_assign(K key, V value) {
-		size_t index = hashFunction(key);
+	/*void insert_or_assign(K key, V value) {
+		size_t index = hash_function(key);
 		for (auto& pair : _data[index]) {
 			if (pair.key == key) {
 				pair.value = value;
@@ -143,28 +111,37 @@ public:
 			}
 		}
 		insert(key, value);
-	}
-
-	/*bool contains(V value) const {
-		for (const auto& pair : _data[index]) {
-			if (pair.value == value);
-				return true;
-			}
-		return false;
 	}*/
 
-	/*bool contains(const V& value) const {
-		for (const auto& pair : _data) {
-			if (pair.not_empty && (pair.value==value)) {
-				return true;
+	void insert_or_assign(K key, V value) {
+		size_t index = hash_function(key);
+		auto& bucket = _data[index];
+		bool found = false;
+		for (auto& pair : bucket) {
+			if (pair.key == key) {
+				pair.value = value;
+				found = true;
+			}
+		}
+		if (!found) {
+			bucket.push_back({ key, value });
+			_size++;
+		}
+	}
+
+	bool contains(const V& value) const {
+		for (const auto& list : _data) {
+			for (const auto& pair : list) {
+				if (pair.not_empty && pair.value == value) {
+					return true;
+				}
 			}
 		}
 		return false;
-	}*/
-
+	}
 
 	bool erase(K key) {
-		size_t index = hashFunction(key);
+		size_t index = hash_function(key);
 		auto& bucket = _data[index];
 		for (auto it = bucket.begin(); it != bucket.end(); ++it) {
 			if (it->key == key) {
@@ -177,7 +154,7 @@ public:
 	}
 
 	size_t count(K key) {
-		size_t index = hashFunction(key);
+		size_t index = hash_function(key);
 		size_t cnt = 0;
 		for (const auto& pair : _data[index]) {
 			if (pair.key == key) {
@@ -188,7 +165,7 @@ public:
 	}
 
 	V* search(const K& key) {
-		size_t index = hashFunction(key);
+		size_t index = hash_function(key);
 		for (auto& pair : _data[index]) {
 			if (pair.key==key) {
 				return &pair.value;
