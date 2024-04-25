@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include<list>
 #include <functional>
 
 template<typename K, typename V>
@@ -15,7 +16,8 @@ class HashTable {
 		Pair(): key(0), value(0), not_empty(false){}
 		Pair(const K& key, const V& value) : key(key), value(value), not_empty(true) {}
 	};
-	std::vector<Pair> _data;
+	std::vector<std::list<Pair>> _data;
+	//std::vector<Pair> _data;
 	size_t _size;
 
 	size_t hashFunction(const K& key) {
@@ -24,6 +26,17 @@ class HashTable {
 		double result = _data.size()*std::fmod(((a/w) * key), 1); // Вычисляем ((a / w) * k) mod 1
 		return result;
 	}
+
+	Pair* find(const K& key) {
+		size_t index = hashFunction(key);
+		for (const auto& pair : _data[index]) {
+			if (pair.key == key && pair.not_empty) {
+				return &pair;
+			}
+		}
+		return nullptr;
+	}
+
 
 public:
 	HashTable() : _data(0), _size(0) {}
@@ -58,45 +71,104 @@ public:
 		return _data.size();
 	}
 
-	void print() const {
+	/*void print() const {
 		for (const Pair& pair : _data) {
 			std::cout << "{" << pair.key << " : " << pair.value << "} ";
 		}
 		std::cout << std::endl;
+	}*/
+
+	void print() const {
+		for (size_t i = 0; i < _data.size(); ++i) {
+			std::cout << "Level " << i << ": ";
+			for (const auto& pair : _data[i]) {
+				std::cout << "{" << pair.key << " : " << pair.value << "} ";
+			}
+			std::cout << std::endl;
+		}
 	}
+
+	V operator[](const K& key) const {
+		Pair* find_pair = find(key);
+		if (find_pair)
+			return find_pair->value;
+		throw std::out_of_range("Key not found");
+	}
+
+	V& operator[](const K& key) {
+		Pair* find_pair = find(key);
+		if (find_pair)
+			return find_pair->value;
+		throw std::out_of_range("Key not found");
+	}
+
+	//void insert(const K& key, const V& value) {
+	//	size_t index = hashFunction(key);
+	//	for (auto& pair : _data[index]) {
+	//		if (comparator_key(pair.key, key)) {
+	//			_data[index].push_back({ key, value });
+	//			_size++;
+	//			return;
+	//		}
+	//	}
+	//	_data[index].push_back({ key, value });  
+	//	_size++;
+	//}
+
+	//void insert_or_assign(const K& key, const V& value) {
+	//	size_t index = hashFunction(key);
+	//	for (auto& pair : _data[index]) {
+	//		if (comparator_key(pair.key, key)) {
+	//			pair.value = value;
+	//			return;
+	//		}
+	//	}
+	//	_data[index].push_back({ key, value });
+	//	_size++;
+	//}
 
 	void insert(K key, V value){
 		size_t index = hashFunction(key);
-		_data[index] = Pair(key, value);
+		_data[index].push_back({ key, value });
 		_size++;
 	}
 
+
 	void insert_or_assign(K key, V value) {
 		size_t index = hashFunction(key);
-		for (auto& pair : _data) {
+		for (auto& pair : _data[index]) {
 			if (pair.key == key) {
 				pair.value = value;
 				return;
 			}
 		}
-		//_data[index]= Pair(key, value);
 		insert(key, value);
 	}
 
-	bool contains(V value) const {
+	/*bool contains(V value) const {
+		for (const auto& pair : _data[index]) {
+			if (pair.value == value);
+				return true;
+			}
+		return false;
+	}*/
+
+	/*bool contains(const V& value) const {
 		for (const auto& pair : _data) {
-			if (pair.value == value) {
+			if (pair.not_empty && (pair.value==value)) {
 				return true;
 			}
 		}
 		return false;
-	}
+	}*/
+
 
 	bool erase(K key) {
 		size_t index = hashFunction(key);
-		for (auto& pair : _data) {
-			if (pair.key == key) {
-				pair.not_empty = false;
+		auto& bucket = _data[index];
+		for (auto it = bucket.begin(); it != bucket.end(); ++it) {
+			if (it->key == key) {
+				bucket.erase(it);
 				_size--;
 				return true;
 			}
@@ -107,7 +179,7 @@ public:
 	size_t count(K key) {
 		size_t index = hashFunction(key);
 		size_t cnt = 0;
-		for (const auto& pair : _data) {
+		for (const auto& pair : _data[index]) {
 			if (pair.key == key) {
 				cnt++;
 			}
@@ -115,10 +187,10 @@ public:
 		return cnt;
 	}
 
-	V* search(K key) {
+	V* search(const K& key) {
 		size_t index = hashFunction(key);
-		for (auto& pair : _data) {
-			if (pair.key == key) {
+		for (auto& pair : _data[index]) {
+			if (pair.key==key) {
 				return &pair.value;
 			}
 		}
