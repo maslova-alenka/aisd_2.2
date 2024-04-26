@@ -26,17 +26,6 @@ class HashTable {
 		return result;
 	}
 
-	Pair* find(const K& key) {
-		size_t index = hash_function(key);
-		for (const auto& pair : _data[index]) {
-			if (pair.key == key && pair.not_empty) {
-				return &pair;
-			}
-		}
-		return nullptr;
-	}
-
-
 public:
 	HashTable() : _data(0), _size(0) {}
 
@@ -81,14 +70,14 @@ public:
 	}
 
 	V operator[](const K& key) const {
-		Pair* find_pair = find(key);
+		Pair* find_pair = search(key);
 		if (find_pair)
 			return find_pair->value;
 		throw std::out_of_range("Key not found");
 	}
 
 	V& operator[](const K& key) {
-		Pair* find_pair = find(key);
+		Pair* find_pair = search(key);
 		if (find_pair)
 			return find_pair->value;
 		throw std::out_of_range("Key not found");
@@ -102,7 +91,7 @@ public:
 	}
 
 
-	/*void insert_or_assign(K key, V value) {
+	void insert_or_assign(K key, V value) {
 		size_t index = hash_function(key);
 		for (auto& pair : _data[index]) {
 			if (pair.key == key) {
@@ -111,22 +100,6 @@ public:
 			}
 		}
 		insert(key, value);
-	}*/
-
-	void insert_or_assign(K key, V value) {
-		size_t index = hash_function(key);
-		auto& bucket = _data[index];
-		bool found = false;
-		for (auto& pair : bucket) {
-			if (pair.key == key) {
-				pair.value = value;
-				found = true;
-			}
-		}
-		if (!found) {
-			bucket.push_back({ key, value });
-			_size++;
-		}
 	}
 
 	bool contains(const V& value) const {
@@ -164,7 +137,7 @@ public:
 		return cnt;
 	}
 
-	V* search(const K& key) {
+	/*V* search(const K& key) {
 		size_t index = hash_function(key);
 		for (auto& pair : _data[index]) {
 			if (pair.key==key) {
@@ -172,6 +145,19 @@ public:
 			}
 		}
 		return nullptr;
+	}*/
+
+	std::vector<V> search(const K& key) {
+		size_t index = hash_function(key);
+		std::vector<V> result;
+
+		for (const auto& pair : _data[index]) {
+			if (pair.key == key) {
+				result.push_back(pair.value);
+			}
+		}
+
+		return result;
 	}
 
 };

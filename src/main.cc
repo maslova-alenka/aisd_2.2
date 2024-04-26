@@ -11,7 +11,7 @@ int main() {
 	hashTable.insert(3, 9);
 	hashTable.insert(3, 8);
 	hashTable.insert(3, 10);
-	hashTable.insert_or_assign(3, 6);
+	//hashTable.insert_or_assign(2, 9);
 
 
 	hashTable.print();
@@ -19,7 +19,7 @@ int main() {
 	std::cout << "count 3: ";
 	std::cout << hashTable.count(3) << std::endl;
 	std::cout << "contains 8: ";
-	std::cout << hashTable.contains(8)<< std::endl;
+	std::cout << hashTable.contains(10)<< std::endl;
 	std::cout << "contains 1: ";
 	std::cout << hashTable.contains(1) << std::endl;
 	std::cout << "erase 1: ";
@@ -29,13 +29,12 @@ int main() {
 	std::cout << std::endl;
 	hashTable.print();
 
-	int* value = hashTable.search(2);
-	if (value) {
-		std::cout << "Value of '2': " << *value << std::endl;
+	std::vector<int> values = hashTable.search(3);
+	std::cout << "Search 3: ";
+	for (int value : values) {
+		std::cout << value << " ";
 	}
-	else {
-		std::cout << "Key '2' not found" << std::endl;
-	}
+	std::cout << std::endl;
 	std::cout << std::endl;
 	std::cout << "Task 3." << std::endl;
 	std::random_device rd;
